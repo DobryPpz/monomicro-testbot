@@ -4,6 +4,8 @@ const fs = require("fs/promises");
 const uniqid = require("uniqid");
 const path = require("path");
 
+const serverPath = "http://212.182.26.143:8080";
+
 const results = {
     "data": []
 };
@@ -27,7 +29,7 @@ class User{
     }
     simulateUse = () => {
         performance.mark("menu-start");
-        axios.get("http://localhost:8080/menu",{
+        axios.get(`${serverPath}/menu`,{
             headers: {
                 "x-access-token": this.token
             }
@@ -37,10 +39,10 @@ class User{
             performance.measure("menu","menu-start","menu-end");
         })
         .catch(err => {
-            console.log("wejście do menu error");
+            //console.log("wejście do menu error");
         });
         performance.mark("decreasing-start");
-        axios.get("http://localhost:8080/score/decreasing",{
+        axios.get(`${serverPath}/score/decreasing`,{
             headers: {
                 "x-access-token": this.token
             }
@@ -50,10 +52,10 @@ class User{
             performance.measure("decreasing","decreasing-start","decreasing-end");
         })
         .catch(err => {
-            console.log("wejście do decreasing error");
+            //console.log("wejście do decreasing error");
         });
         performance.mark("increasing-start");
-        axios.get("http://localhost:8080/score/increasing",{
+        axios.get(`${serverPath}/score/increasing`,{
             headers: {
                 "x-access-token": this.token
             }
@@ -63,10 +65,10 @@ class User{
             performance.measure("increasing","increasing-start","increasing-end");
         })
         .catch(err => {
-            console.log("wejście do increasing error");
+            //console.log("wejście do increasing error");
         });
         performance.mark("player-start");
-        axios.get("http://localhost:8080/score/player",{
+        axios.get(`${serverPath}/score/player`,{
             headers: {
                 "x-access-token": this.token
             }
@@ -76,10 +78,10 @@ class User{
             performance.measure("player","player-start","player-end");
         })
         .catch(err => {
-            console.log("wejście do player error");
+            //console.log("wejście do player error");
         });
         performance.mark("menu-start");
-        axios.get("http://localhost:8080/menu",{
+        axios.get(`${serverPath}/menu`,{
             headers: {
                 "x-access-token": this.token
             }
@@ -89,10 +91,10 @@ class User{
             performance.measure("menu","menu-start","menu-end");
         })
         .catch(err => {
-            console.log("wejście do menu error");
+            //console.log("wejście do menu error");
         });
         performance.mark("settings-start");
-        axios.post("http://localhost:8080/settings/save",{
+        axios.post(`${serverPath}/settings/save`,{
             "skincolor": "#FFFFFF",
             "bulletcolor": "#FFFFFF",
             "deathsound": "deathsounddefault.wav",
@@ -107,10 +109,10 @@ class User{
             performance.measure("settings","settings-start","settings-end");
         })
         .catch(err => {
-            console.log("zapis settings error");
+            //console.log("zapis settings error");
         });
         performance.mark("menu-start");
-        axios.get("http://localhost:8080/menu",{
+        axios.get(`${serverPath}/menu`,{
             headers: {
                 "x-access-token": this.token
             }
@@ -120,10 +122,10 @@ class User{
             performance.measure("menu","menu-start","menu-end");
         })
         .catch(err => {
-            console.log("wejście do menu error");
+            //console.log("wejście do menu error");
         });
         performance.mark("game-start");
-        axios.post("http://localhost:8080/game",{
+        axios.post(`${serverPath}/game`,{
             "socketid": ""
         },{
             headers: {
@@ -135,14 +137,14 @@ class User{
             performance.measure("game","game-start","game-end");
         })
         .catch(err => {
-            console.log("wejście do gry error");
+            //console.log("wejście do gry error");
         });
     }
     register = async () => {
         this.username = uniqid();
         this.password = "w";
         performance.mark("register-start");
-        await axios.post("http://localhost:8080/auth/signup",{
+        await axios.post(`${serverPath}/auth/signup`,{
             "username": this.username,
             "password": this.password
         })
@@ -151,12 +153,12 @@ class User{
             performance.measure("register","register-start","register-end");
         })
         .catch(err => {
-            console.log("register error");
+            //console.log("register error");
         });
     }
     login = async () => {
         performance.mark("login-start")
-        await axios.post("http://localhost:8080/auth/signin",{
+        await axios.post(`${serverPath}/auth/signin`,{
             "username": this.username,
             "password": this.password
         })
@@ -164,10 +166,10 @@ class User{
             performance.mark("login-end");
             performance.measure("login","login-start","login-end");
             this.token = response.data["x-access-token"];
-            console.log(this.token);
+            //console.log(this.token);
         })
         .catch(err => {
-            console.log("login error");
+            //console.log("login error");
         });
     }
     start = () => {
@@ -179,7 +181,7 @@ class User{
 }
 
 const initiate = async () => {
-    for(let i=0;i<50;i++){
+    for(let i=0;i<10;i++){
         const u = new User;
         Users.push(u);
         await u.register();
@@ -190,11 +192,13 @@ const initiate = async () => {
 initiate().then(() => {
     for(let u of Users){
         u.start();
-        setTimeout(async () => {
-            u.stop();
-            await fs.writeFile(path.join(__dirname,"50users.json"),JSON.stringify(results))
-        },30000);
     }
+    setTimeout(async () => {
+        for(let u of Users){
+            u.stop();
+        }
+        await fs.writeFile(path.join(__dirname,"10users.json"),JSON.stringify(results))
+    },30000);
 });
 
 
